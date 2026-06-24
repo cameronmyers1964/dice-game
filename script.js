@@ -15,11 +15,9 @@ function isViper(name) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
     document.getElementById("startBtn").addEventListener("click", startGame);
     document.getElementById("rollBtn").addEventListener("click", rollDice);
     document.getElementById("resetBtn").addEventListener("click", resetGame);
-
 });
 
 function startGame() {
@@ -37,9 +35,8 @@ function startGame() {
     document.getElementById("p1Name").textContent = p1;
     document.getElementById("p2Name").textContent = p2;
 
-    document.getElementById("scores").textContent = "";
     document.getElementById("history").innerHTML = "";
-
+    document.getElementById("scores").textContent = "";
     document.getElementById("status").textContent = "Game Started";
 
     document.getElementById("rollBtn").disabled = false;
@@ -55,39 +52,38 @@ function rollDice() {
     const p1IsViper = isViper(p1);
     const p2IsViper = isViper(p2);
 
-    // 🎲 DEFAULT RANDOM DICE
+    // 🎲 DEFAULT ROLLS
     let a = rollDie();
     let b = rollDie();
     let c = rollDie();
     let d = rollDie();
 
-    // 🐍 VIPER RULE (after 3 wins)
+    // 🐍 VIPER RULE (Option B)
     if (p1IsViper && p1Wins >= 3) {
         c = 6;
-        d = rollDie();
+        d = Math.max(rollDie(), 4); // clamp 4–6
     }
 
     if (p2IsViper && p2Wins >= 3) {
         a = 6;
-        b = rollDie();
+        b = Math.max(rollDie(), 4); // clamp 4–6
     }
 
     const total1 = a + b;
     const total2 = c + d;
 
-    // 🎲 UPDATE DICE IMAGES
+    // 🎲 visuals
     document.getElementById("p1d1").style.backgroundImage = `url('${a}.png')`;
     document.getElementById("p1d2").style.backgroundImage = `url('${b}.png')`;
     document.getElementById("p2d1").style.backgroundImage = `url('${c}.png')`;
     document.getElementById("p2d2").style.backgroundImage = `url('${d}.png')`;
 
-    document.getElementById("p1Total").textContent = `Total: ${total1}`;
-    document.getElementById("p2Total").textContent = `Total: ${total2}`;
+    document.getElementById("p1Total").textContent = total1;
+    document.getElementById("p2Total").textContent = total2;
 
-    // 🤝 TIE
+    // 🤝 tie
     if (total1 === total2) {
-        document.getElementById("status").textContent =
-            tieBreaker ? "🔥 TIEBREAKER - Roll Again" : "Tie - Roll Again";
+        document.getElementById("status").textContent = "Tie - Roll Again";
         return;
     }
 
@@ -95,19 +91,6 @@ function rollDice() {
 
     const p1Name = document.getElementById("p1Name").textContent;
     const p2Name = document.getElementById("p2Name").textContent;
-
-    // 🔥 TIEBREAKER MODE
-    if (tieBreaker) {
-
-        const finalWinner = winner === "p1" ? p1Name : p2Name;
-
-        document.getElementById("status").textContent =
-            `🏆 Winner: ${finalWinner}`;
-
-        gameOver = true;
-        document.getElementById("rollBtn").disabled = true;
-        return;
-    }
 
     countedRounds++;
 
@@ -121,14 +104,7 @@ function rollDice() {
         `Round ${countedRounds}: ${p1Name} ${total1} - ${total2} ${p2Name}<br>` +
         document.getElementById("history").innerHTML;
 
-    // 🔥 TIEBREAKER TRIGGER
-    if (p1Wins === 5 && p2Wins === 5) {
-        tieBreaker = true;
-        document.getElementById("status").textContent = "🔥 TIEBREAKER ROUND";
-        return;
-    }
-
-    // END GAME
+    // end game
     if (countedRounds >= 10 || p1Wins >= 6 || p2Wins >= 6) {
 
         const finalWinner = p1Wins > p2Wins ? p1Name : p2Name;
@@ -154,16 +130,9 @@ function resetGame() {
     document.getElementById("p1Name").textContent = "Player 1";
     document.getElementById("p2Name").textContent = "Player 2";
 
-    document.getElementById("scores").textContent = "";
     document.getElementById("history").innerHTML = "";
-
-    document.getElementById("status").textContent =
-        "Enter names and press Start Game";
+    document.getElementById("scores").textContent = "";
+    document.getElementById("status").textContent = "Enter names and press Start Game";
 
     document.getElementById("rollBtn").disabled = true;
-
-    document.getElementById("p1d1").style.backgroundImage = "";
-    document.getElementById("p1d2").style.backgroundImage = "";
-    document.getElementById("p2d1").style.backgroundImage = "";
-    document.getElementById("p2d2").style.backgroundImage = "";
 }
