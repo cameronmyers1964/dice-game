@@ -1,7 +1,9 @@
 let p1Wins = 0;
 let p2Wins = 0;
 let rollCount = 0;
+
 let gameOver = false;
+let suddenDeath = false;
 
 function rand() {
   return Math.floor(Math.random() * 6) + 1;
@@ -23,34 +25,8 @@ function startGame() {
   document.getElementById("p2Name").innerText = p2;
 
   document.getElementById("rollBtn").disabled = false;
+
   document.getElementById("status").innerText = "Game Started";
-}
-
-function isViper(name) {
-  return name.toLowerCase().includes("viper");
-}
-
-function resolveWinner(total1, total2) {
-
-  const p1 = document.getElementById("p1Name").innerText;
-  const p2 = document.getElementById("p2Name").innerText;
-
-  const p1V = isViper(p1);
-  const p2V = isViper(p2);
-
-  // BASE RULE
-  let winner = total1 > total2 ? "p1" : "p2";
-
-  // VIPER RULE (SINGLE SOURCE OF TRUTH)
-  if (p1V && !p2V) {
-    if (Math.random() < 0.6) winner = "p2";
-  }
-
-  if (p2V && !p1V) {
-    if (Math.random() < 0.6) winner = "p1";
-  }
-
-  return winner;
 }
 
 function roll() {
@@ -61,6 +37,7 @@ function roll() {
 
   setTimeout(() => {
 
+    // 🎲 DICE ROLL (ALWAYS NUMBERS)
     const a = rand();
     const b = rand();
     const c = rand();
@@ -71,31 +48,65 @@ function roll() {
 
     let resultText = "";
 
-    // TIE RULE
+    // 🟡 TIE RULE (normal + sudden death)
     if (total1 === total2) {
+
       resultText = "Tie - Roll Again";
-      render(a,b,c,d,total1,total2,resultText);
+
+      document.getElementById("status").innerText =
+        suddenDeath ? "🔥 SUDDEN DEATH - TIE (ROLL AGAIN)" : "Tie - Roll Again";
+
+      render(a, b, c, d, total1, total2, resultText);
+
       document.getElementById("rollBtn").disabled = false;
       return;
     }
 
     rollCount++;
 
-    const winner = resolveWinner(total1, total2);
+    // 🔥 SUDDEN DEATH ACTIVATION
+    if (p1Wins === 5 && p2Wins === 5 && !suddenDeath) {
+      suddenDeath = true;
+      document.getElementById("status").innerText = "🔥 SUDDEN DEATH";
+    }
 
+    // 🧠 DETERMINE WINNER (PURE RULE)
+    let winner = total1 > total2 ? "p1" : "p2";
+
+    // 🧨 SUDDEN DEATH OVERRIDE RULE
+    if (suddenDeath) {
+      // first non-tie already reached here → game ends immediately
+      endGame(winner);
+      return;
+    }
+
+    // 📊 NORMAL SCORING
     if (winner === "p1") p1Wins++;
     else p2Wins++;
 
-    render(a,b,c,d,total1,total2,resultText);
+    render(a, b, c, d, total1, total2, resultText);
+
+    checkGameEnd();
 
     document.getElementById("rollBtn").disabled = false;
 
-    checkEnd();
-
-  }, 500);
+  }, 400);
 }
 
-function render(a,b,c,d,total1,total2,resultText) {
+function checkGameEnd() {
+
+  // standard win condition
+  if (rollCount >= 10) {
+    endGame();
+  }
+
+  // optional early win condition (dominance rule)
+  if (p1Wins >= 6 || p2Wins >= 6) {
+    endGame();
+  }
+}
+
+function render(a, b, c, d, total1, total2, resultText) {
 
   document.getElementById("p1d1").style.backgroundImage = `url(${a}.png)`;
   document.getElementById("p1d2").style.backgroundImage = `url(${b}.png)`;
@@ -113,21 +124,26 @@ function render(a,b,c,d,total1,total2,resultText) {
     `${p1} ${p1Wins} | ${p2} ${p2Wins}`;
 }
 
-function checkEnd() {
-  if (rollCount >= 10) endGame();
-}
-
-function endGame() {
+function endGame(forcedWinner = null) {
 
   gameOver = true;
-
-  const winner =
-    p1Wins > p2Wins ? document.getElementById("p1Name").innerText :
-    p2Wins > p1Wins ? document.getElementById("p2Name").innerText :
-    "Tie Game";
-
-  document.getElementById("status").innerText = "Winner: " + winner;
+  suddenDeath = false;
 
   document.getElementById("rollBtn").disabled = true;
-  document.getElementById("resetBtn").classList.remove("hidden");
+
+  const p1 = document.getElementById("p1Name").innerText;
+  const p2 = document.getElementById("p2Name").innerText;
+
+  let winner;
+
+  if (forcedWinner) {
+    winner = forcedWinner === "p1" ? p1 : p2;
+  } else {
+    winner =
+      p1Wins > p2Wins ? p1 :
+      p2Wins > p1Wins ? p2 :
+      "Tie Game";
+  }
+
+  document.getElementById("status").innerText = "🏆 Winner: " + winner;
 }
