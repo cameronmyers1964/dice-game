@@ -56,24 +56,20 @@ function rollDice() {
     const total1 = a + b;
     const total2 = c + d;
 
-    document.getElementById("p1d1").textContent = a;
-    document.getElementById("p1d2").textContent = b;
+    // 🎲 DICE IMAGES RESTORED
+    document.getElementById("p1d1").style.backgroundImage = `url('${a}.png')`;
+    document.getElementById("p1d2").style.backgroundImage = `url('${b}.png')`;
+    document.getElementById("p2d1").style.backgroundImage = `url('${c}.png')`;
+    document.getElementById("p2d2").style.backgroundImage = `url('${d}.png')`;
 
-    document.getElementById("p2d1").textContent = c;
-    document.getElementById("p2d2").textContent = d;
+    document.getElementById("p1Total").textContent = `Total: ${total1}`;
+    document.getElementById("p2Total").textContent = `Total: ${total2}`;
 
-    document.getElementById("p1Total").textContent =
-        `Total: ${total1}`;
-
-    document.getElementById("p2Total").textContent =
-        `Total: ${total2}`;
-
+    // 🤝 TIE RULE
     if (total1 === total2) {
 
         document.getElementById("status").textContent =
-            tieBreaker ?
-            "🔥 TIE BREAKER - Tie - Roll Again" :
-            "Tie - Roll Again";
+            tieBreaker ? "🔥 TIEBREAKER - Roll Again" : "Tie - Roll Again";
 
         return;
     }
@@ -81,6 +77,7 @@ function rollDice() {
     const p1 = document.getElementById("p1Name").textContent;
     const p2 = document.getElementById("p2Name").textContent;
 
+    // 🔥 TIEBREAKER MODE (5–5)
     if (tieBreaker) {
 
         const winner = total1 > total2 ? p1 : p2;
@@ -95,6 +92,7 @@ function rollDice() {
 
     countedRounds++;
 
+    // normal scoring
     if (total1 > total2) {
         p1Wins++;
     } else {
@@ -108,16 +106,18 @@ function rollDice() {
         `Round ${countedRounds}: ${p1} ${total1} - ${total2} ${p2}<br>` +
         document.getElementById("history").innerHTML;
 
+    // 🔥 trigger tie breaker at 5–5
     if (p1Wins === 5 && p2Wins === 5) {
 
         tieBreaker = true;
 
         document.getElementById("status").textContent =
-            "🔥 TIE BREAKER ROUND";
+            "🔥 TIEBREAKER ROUND";
 
         return;
     }
 
+    // end conditions
     if (countedRounds >= 10 || p1Wins >= 6 || p2Wins >= 6) {
 
         const winner = p1Wins > p2Wins ? p1 : p2;
@@ -132,25 +132,16 @@ function rollDice() {
 
 function resetGame() {
 
-    gameStarted = false;
-    gameOver = false;
-    tieBreaker = false;
-
     p1Wins = 0;
     p2Wins = 0;
     countedRounds = 0;
 
+    gameStarted = false;
+    gameOver = false;
+    tieBreaker = false;
+
     document.getElementById("p1Name").textContent = "Player 1";
     document.getElementById("p2Name").textContent = "Player 2";
-
-    document.getElementById("p1d1").textContent = "-";
-    document.getElementById("p1d2").textContent = "-";
-
-    document.getElementById("p2d1").textContent = "-";
-    document.getElementById("p2d2").textContent = "-";
-
-    document.getElementById("p1Total").textContent = "";
-    document.getElementById("p2Total").textContent = "";
 
     document.getElementById("scores").textContent = "";
     document.getElementById("history").innerHTML = "";
@@ -159,4 +150,10 @@ function resetGame() {
         "Enter names and press Start Game";
 
     document.getElementById("rollBtn").disabled = true;
+
+    // clear dice images
+    document.getElementById("p1d1").style.backgroundImage = "";
+    document.getElementById("p1d2").style.backgroundImage = "";
+    document.getElementById("p2d1").style.backgroundImage = "";
+    document.getElementById("p2d2").style.backgroundImage = "";
 }
