@@ -10,6 +10,10 @@ function rollDie() {
     return Math.floor(Math.random() * 6) + 1;
 }
 
+function isViper(name) {
+    return name.toLowerCase().includes("viper");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("startBtn").addEventListener("click", startGame);
@@ -33,13 +37,10 @@ function startGame() {
     document.getElementById("p1Name").textContent = p1;
     document.getElementById("p2Name").textContent = p2;
 
-    document.getElementById("scores").textContent =
-        `${p1}: 0 wins | ${p2}: 0 wins`;
-
+    document.getElementById("scores").textContent = "";
     document.getElementById("history").innerHTML = "";
 
-    document.getElementById("status").textContent =
-        "Game Started";
+    document.getElementById("status").textContent = "Game Started";
 
     document.getElementById("rollBtn").disabled = false;
 }
@@ -56,7 +57,7 @@ function rollDice() {
     const total1 = a + b;
     const total2 = c + d;
 
-    // 🎲 DICE IMAGES RESTORED
+    // 🎲 DICE IMAGES
     document.getElementById("p1d1").style.backgroundImage = `url('${a}.png')`;
     document.getElementById("p1d2").style.backgroundImage = `url('${b}.png')`;
     document.getElementById("p2d1").style.backgroundImage = `url('${c}.png')`;
@@ -65,25 +66,46 @@ function rollDice() {
     document.getElementById("p1Total").textContent = `Total: ${total1}`;
     document.getElementById("p2Total").textContent = `Total: ${total2}`;
 
-    // 🤝 TIE RULE
+    // 🤝 TIE
     if (total1 === total2) {
-
         document.getElementById("status").textContent =
             tieBreaker ? "🔥 TIEBREAKER - Roll Again" : "Tie - Roll Again";
-
         return;
     }
 
     const p1 = document.getElementById("p1Name").textContent;
     const p2 = document.getElementById("p2Name").textContent;
 
-    // 🔥 TIEBREAKER MODE (5–5)
+    const p1IsViper = isViper(p1);
+    const p2IsViper = isViper(p2);
+
+    // 🐍 VIPER BOOST RULE
+    let adjusted1 = total1;
+    let adjusted2 = total2;
+
+    if (p1IsViper && p1Wins >= 4) {
+        adjusted2 += 3;
+    }
+
+    if (p2IsViper && p2Wins >= 4) {
+        adjusted1 += 3;
+    }
+
+    adjusted1 = Math.min(adjusted1, 12);
+    adjusted2 = Math.min(adjusted2, 12);
+
+    let winner;
+
+    if (adjusted1 > adjusted2) winner = "p1";
+    else winner = "p2";
+
+    // 🔥 TIEBREAKER MODE
     if (tieBreaker) {
 
-        const winner = total1 > total2 ? p1 : p2;
+        const finalWinner = winner === "p1" ? p1 : p2;
 
         document.getElementById("status").textContent =
-            `🏆 Winner: ${winner}`;
+            `🏆 Winner: ${finalWinner}`;
 
         gameOver = true;
         document.getElementById("rollBtn").disabled = true;
@@ -92,38 +114,30 @@ function rollDice() {
 
     countedRounds++;
 
-    // normal scoring
-    if (total1 > total2) {
-        p1Wins++;
-    } else {
-        p2Wins++;
-    }
-
-    document.getElementById("scores").textContent =
-        `${p1}: ${p1Wins} wins | ${p2}: ${p2Wins} wins`;
+    if (winner === "p1") p1Wins++;
+    else p2Wins++;
 
     document.getElementById("history").innerHTML =
-        `Round ${countedRounds}: ${p1} ${total1} - ${total2} ${p2}<br>` +
+        `Round ${countedRounds}: ${p1} ${adjusted1} - ${adjusted2} ${p2}<br>` +
         document.getElementById("history").innerHTML;
 
-    // 🔥 trigger tie breaker at 5–5
+    document.getElementById("scores").textContent =
+        `${p1}: ${p1Wins} | ${p2}: ${p2Wins}`;
+
+    // 🔥 TIEBREAKER TRIGGER
     if (p1Wins === 5 && p2Wins === 5) {
-
         tieBreaker = true;
-
-        document.getElementById("status").textContent =
-            "🔥 TIEBREAKER ROUND";
-
+        document.getElementById("status").textContent = "🔥 TIEBREAKER ROUND";
         return;
     }
 
-    // end conditions
+    // END GAME CONDITIONS
     if (countedRounds >= 10 || p1Wins >= 6 || p2Wins >= 6) {
 
-        const winner = p1Wins > p2Wins ? p1 : p2;
+        const finalWinner = p1Wins > p2Wins ? p1 : p2;
 
         document.getElementById("status").textContent =
-            `🏆 Winner: ${winner}`;
+            `🏆 Winner: ${finalWinner}`;
 
         gameOver = true;
         document.getElementById("rollBtn").disabled = true;
@@ -151,7 +165,6 @@ function resetGame() {
 
     document.getElementById("rollBtn").disabled = true;
 
-    // clear dice images
     document.getElementById("p1d1").style.backgroundImage = "";
     document.getElementById("p1d2").style.backgroundImage = "";
     document.getElementById("p2d1").style.backgroundImage = "";
