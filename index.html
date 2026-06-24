@@ -15,23 +15,18 @@
 
 <div class="container">
 
-  <!-- SETUP -->
   <div class="setup">
     <input id="p1" placeholder="Player 1 Name">
     <input id="p2" placeholder="Player 2 Name">
     <button id="startBtn">Start Game</button>
   </div>
 
-  <!-- STATUS -->
   <div id="status">Enter names to begin</div>
 
-  <!-- SCOREBOARD -->
-  <div id="scores" style="margin-top:10px;"></div>
+  <div id="scores"></div>
 
-  <!-- GAME BOARD -->
   <div class="players">
 
-    <!-- PLAYER 1 -->
     <div class="card blue">
       <h2 id="p1Name">Player 1</h2>
 
@@ -39,11 +34,8 @@
         <div class="dice" id="p1d1"></div>
         <div class="dice" id="p1d2"></div>
       </div>
-
-      <div id="p1total"></div>
     </div>
 
-    <!-- PLAYER 2 -->
     <div class="card pink">
       <h2 id="p2Name">Player 2</h2>
 
@@ -51,18 +43,14 @@
         <div class="dice" id="p2d1"></div>
         <div class="dice" id="p2d2"></div>
       </div>
-
-      <div id="p2total"></div>
     </div>
 
   </div>
 
-  <!-- HISTORY -->
-  <div id="history" style="margin-top:20px;"></div>
+  <div id="history"></div>
 
-  <!-- CONTROLS -->
   <button id="rollBtn" disabled>ROLL</button>
-  <button id="resetBtn" class="hidden">RESET</button>
+  <button id="resetBtn">RESET</button>
 
 </div>
 
