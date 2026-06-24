@@ -3,20 +3,19 @@ let p2Wins = 0;
 let rollCount = 0;
 let gameOver = false;
 
-let viperPattern = [];
-let viperIndex = 0;
-
 function rand() {
   return Math.floor(Math.random() * 6) + 1;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+
   document.getElementById("startBtn").addEventListener("click", startGame);
   document.getElementById("rollBtn").addEventListener("click", roll);
   document.getElementById("resetBtn").addEventListener("click", () => location.reload());
 });
 
 function startGame() {
+
   const p1 = document.getElementById("p1").value || "Player 1";
   const p2 = document.getElementById("p2").value || "Player 2";
 
@@ -24,76 +23,67 @@ function startGame() {
   document.getElementById("p2Name").innerText = p2;
 
   document.getElementById("rollBtn").disabled = false;
-
-  if (p1.toLowerCase().includes("viper") || p2.toLowerCase().includes("viper")) {
-    buildViperPattern();
-  }
+  document.getElementById("status").innerText = "Game Started";
 }
 
-function buildViperPattern() {
-  viperPattern = [];
-  viperIndex = 0;
+function isViper(name) {
+  return name.toLowerCase().includes("viper");
+}
 
-  let losses = 0;
+function resolveWinner(total1, total2) {
 
-  for (let i = 0; i < 10; i++) {
+  const p1 = document.getElementById("p1Name").innerText;
+  const p2 = document.getElementById("p2Name").innerText;
 
-    // ensure EXACTLY 6 losses total
-    if (losses < 6) {
-      viperPattern.push(Math.random() < 0.5 ? "win" : "loss");
-    } else {
-      viperPattern.push("win");
-    }
+  const p1V = isViper(p1);
+  const p2V = isViper(p2);
 
-    if (viperPattern[i] === "loss") losses++;
+  // BASE RULE
+  let winner = total1 > total2 ? "p1" : "p2";
+
+  // VIPER RULE (SINGLE SOURCE OF TRUTH)
+  if (p1V && !p2V) {
+    if (Math.random() < 0.6) winner = "p2";
   }
+
+  if (p2V && !p1V) {
+    if (Math.random() < 0.6) winner = "p1";
+  }
+
+  return winner;
 }
 
 function roll() {
+
   if (gameOver) return;
 
   document.getElementById("rollBtn").disabled = true;
 
   setTimeout(() => {
 
-    // ALWAYS NUMBERS
     const a = rand();
     const b = rand();
     const c = rand();
     const d = rand();
 
-    const total1 = Number(a + b);
-    const total2 = Number(c + d);
+    const total1 = a + b;
+    const total2 = c + d;
 
     let resultText = "";
 
-    // TIE RULE (no scoring)
+    // TIE RULE
     if (total1 === total2) {
       resultText = "Tie - Roll Again";
-
       render(a,b,c,d,total1,total2,resultText);
-
       document.getElementById("rollBtn").disabled = false;
       return;
     }
 
     rollCount++;
 
-    let p1WinsRound = total1 > total2;
+    const winner = resolveWinner(total1, total2);
 
-    // VIPER OVERRIDE (SAFE + CONTROLLED)
-    if (viperPattern.length && viperIndex < viperPattern.length) {
-
-      const outcome = viperPattern[viperIndex++];
-
-      if (outcome === "loss") {
-        p1WinsRound = false;
-      } else {
-        p1WinsRound = true;
-      }
-    }
-
-    if (p1WinsRound) p1Wins++;
+    if (winner === "p1") p1Wins++;
     else p2Wins++;
 
     render(a,b,c,d,total1,total2,resultText);
@@ -102,7 +92,7 @@ function roll() {
 
     checkEnd();
 
-  }, 600);
+  }, 500);
 }
 
 function render(a,b,c,d,total1,total2,resultText) {
