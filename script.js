@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("startBtn").addEventListener("click", startGame);
   document.getElementById("rollBtn").addEventListener("click", roll);
-  document.getElementById("resetBtn").addEventListener("click", () => location.reload());
+  document.getElementById("resetBtn").addEventListener("click", resetGame);
 });
 
 function startGame() {
@@ -25,7 +25,6 @@ function startGame() {
   document.getElementById("p2Name").innerText = p2;
 
   document.getElementById("rollBtn").disabled = false;
-
   document.getElementById("status").innerText = "Game Started";
 }
 
@@ -37,7 +36,6 @@ function roll() {
 
   setTimeout(() => {
 
-    // 🎲 DICE ROLL (ALWAYS NUMBERS)
     const a = rand();
     const b = rand();
     const c = rand();
@@ -48,15 +46,13 @@ function roll() {
 
     let resultText = "";
 
-    // 🟡 TIE RULE (normal + sudden death)
+    // TIE RULE
     if (total1 === total2) {
-
-      resultText = "Tie - Roll Again";
 
       document.getElementById("status").innerText =
         suddenDeath ? "🔥 SUDDEN DEATH - TIE (ROLL AGAIN)" : "Tie - Roll Again";
 
-      render(a, b, c, d, total1, total2, resultText);
+      render(a,b,c,d,total1,total2,"Tie - Roll Again");
 
       document.getElementById("rollBtn").disabled = false;
       return;
@@ -64,49 +60,46 @@ function roll() {
 
     rollCount++;
 
-    // 🔥 SUDDEN DEATH ACTIVATION
-    if (p1Wins === 5 && p2Wins === 5 && !suddenDeath) {
+    // SUDDEN DEATH TRIGGER
+    if (p1Wins === 5 && p2Wins === 5) {
       suddenDeath = true;
       document.getElementById("status").innerText = "🔥 SUDDEN DEATH";
     }
 
-    // 🧠 DETERMINE WINNER (PURE RULE)
     let winner = total1 > total2 ? "p1" : "p2";
 
-    // 🧨 SUDDEN DEATH OVERRIDE RULE
-    if (suddenDeath) {
-      // first non-tie already reached here → game ends immediately
+    if (!suddenDeath) {
+
+      if (winner === "p1") p1Wins++;
+      else p2Wins++;
+
+    } else {
+      // sudden death: first non-tie ends game immediately
       endGame(winner);
       return;
     }
 
-    // 📊 NORMAL SCORING
-    if (winner === "p1") p1Wins++;
-    else p2Wins++;
+    render(a,b,c,d,total1,total2,resultText);
 
-    render(a, b, c, d, total1, total2, resultText);
-
-    checkGameEnd();
+    checkEnd();
 
     document.getElementById("rollBtn").disabled = false;
 
   }, 400);
 }
 
-function checkGameEnd() {
+function checkEnd() {
 
-  // standard win condition
   if (rollCount >= 10) {
     endGame();
   }
 
-  // optional early win condition (dominance rule)
   if (p1Wins >= 6 || p2Wins >= 6) {
     endGame();
   }
 }
 
-function render(a, b, c, d, total1, total2, resultText) {
+function render(a,b,c,d,total1,total2,resultText) {
 
   document.getElementById("p1d1").style.backgroundImage = `url(${a}.png)`;
   document.getElementById("p1d2").style.backgroundImage = `url(${b}.png)`;
@@ -146,4 +139,25 @@ function endGame(forcedWinner = null) {
   }
 
   document.getElementById("status").innerText = "🏆 Winner: " + winner;
+}
+
+function resetGame() {
+
+  p1Wins = 0;
+  p2Wins = 0;
+  rollCount = 0;
+
+  gameOver = false;
+  suddenDeath = false;
+
+  document.getElementById("history").innerHTML = "";
+  document.getElementById("scores").innerText = "";
+  document.getElementById("status").innerText = "Game Reset";
+
+  document.getElementById("rollBtn").disabled = true;
+
+  document.getElementById("p1d1").style.backgroundImage = "";
+  document.getElementById("p1d2").style.backgroundImage = "";
+  document.getElementById("p2d1").style.backgroundImage = "";
+  document.getElementById("p2d2").style.backgroundImage = "";
 }
