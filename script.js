@@ -49,15 +49,33 @@ function rollDice() {
 
     if (!gameStarted || gameOver) return;
 
-    const a = rollDie();
-    const b = rollDie();
-    const c = rollDie();
-    const d = rollDie();
+    const p1 = document.getElementById("p1Name").textContent;
+    const p2 = document.getElementById("p2Name").textContent;
+
+    const p1IsViper = isViper(p1);
+    const p2IsViper = isViper(p2);
+
+    // 🎲 DEFAULT RANDOM DICE
+    let a = rollDie();
+    let b = rollDie();
+    let c = rollDie();
+    let d = rollDie();
+
+    // 🐍 VIPER RULE (after 3 wins)
+    if (p1IsViper && p1Wins >= 3) {
+        c = 6;
+        d = rollDie();
+    }
+
+    if (p2IsViper && p2Wins >= 3) {
+        a = 6;
+        b = rollDie();
+    }
 
     const total1 = a + b;
     const total2 = c + d;
 
-    // 🎲 DICE IMAGES
+    // 🎲 UPDATE DICE IMAGES
     document.getElementById("p1d1").style.backgroundImage = `url('${a}.png')`;
     document.getElementById("p1d2").style.backgroundImage = `url('${b}.png')`;
     document.getElementById("p2d1").style.backgroundImage = `url('${c}.png')`;
@@ -73,36 +91,15 @@ function rollDice() {
         return;
     }
 
-    const p1 = document.getElementById("p1Name").textContent;
-    const p2 = document.getElementById("p2Name").textContent;
+    const winner = total1 > total2 ? "p1" : "p2";
 
-    const p1IsViper = isViper(p1);
-    const p2IsViper = isViper(p2);
-
-    // 🐍 VIPER BOOST RULE
-    let adjusted1 = total1;
-    let adjusted2 = total2;
-
-    if (p1IsViper && p1Wins >= 4) {
-        adjusted2 += 3;
-    }
-
-    if (p2IsViper && p2Wins >= 4) {
-        adjusted1 += 3;
-    }
-
-    adjusted1 = Math.min(adjusted1, 12);
-    adjusted2 = Math.min(adjusted2, 12);
-
-    let winner;
-
-    if (adjusted1 > adjusted2) winner = "p1";
-    else winner = "p2";
+    const p1Name = document.getElementById("p1Name").textContent;
+    const p2Name = document.getElementById("p2Name").textContent;
 
     // 🔥 TIEBREAKER MODE
     if (tieBreaker) {
 
-        const finalWinner = winner === "p1" ? p1 : p2;
+        const finalWinner = winner === "p1" ? p1Name : p2Name;
 
         document.getElementById("status").textContent =
             `🏆 Winner: ${finalWinner}`;
@@ -117,12 +114,12 @@ function rollDice() {
     if (winner === "p1") p1Wins++;
     else p2Wins++;
 
-    document.getElementById("history").innerHTML =
-        `Round ${countedRounds}: ${p1} ${adjusted1} - ${adjusted2} ${p2}<br>` +
-        document.getElementById("history").innerHTML;
-
     document.getElementById("scores").textContent =
-        `${p1}: ${p1Wins} | ${p2}: ${p2Wins}`;
+        `${p1Name}: ${p1Wins} | ${p2Name}: ${p2Wins}`;
+
+    document.getElementById("history").innerHTML =
+        `Round ${countedRounds}: ${p1Name} ${total1} - ${total2} ${p2Name}<br>` +
+        document.getElementById("history").innerHTML;
 
     // 🔥 TIEBREAKER TRIGGER
     if (p1Wins === 5 && p2Wins === 5) {
@@ -131,10 +128,10 @@ function rollDice() {
         return;
     }
 
-    // END GAME CONDITIONS
+    // END GAME
     if (countedRounds >= 10 || p1Wins >= 6 || p2Wins >= 6) {
 
-        const finalWinner = p1Wins > p2Wins ? p1 : p2;
+        const finalWinner = p1Wins > p2Wins ? p1Name : p2Name;
 
         document.getElementById("status").textContent =
             `🏆 Winner: ${finalWinner}`;
