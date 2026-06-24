@@ -1,65 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Best of 10 Dice Game</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Best of 10 Dice Game</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div class="header">
-    🎲 <b>BEST OF 10 DICE GAME</b> 🎲
+<div class="header">
+🎲 <b>BEST OF 10 DICE GAME</b> 🎲
+</div>
+
+<div class="container">
+
+  <div class="setup">
+    <input id="p1" placeholder="Player 1 Name">
+    <input id="p2" placeholder="Player 2 Name">
+    <button id="startBtn">Start Game</button>
   </div>
 
-  <div class="container">
+  <div id="status">Enter names to begin</div>
 
-    <div class="setup">
-      <input id="p1" placeholder="Player 1 Name">
-      <input id="p2" placeholder="Player 2 Name">
-      <button id="startBtn">Start Game</button>
-    </div>
+  <div class="scoreboard" id="scores"></div>
 
-    <div class="scoreboard">
-      <div id="status">Enter names to begin</div>
-      <div id="scores"></div>
-    </div>
+  <div class="players">
 
-    <div class="players">
-
-      <div class="card blue">
-        <h2 id="p1Name">Player 1</h2>
-        <div class="diceRow">
-          <div class="dice" id="p1d1"></div>
-          <div class="dice" id="p1d2"></div>
-        </div>
-        <div id="p1total"></div>
-        <div id="p1wins"></div>
+    <div class="card blue">
+      <h2 id="p1Name">Player 1</h2>
+      <div class="diceRow">
+        <div class="dice" id="p1d1"></div>
+        <div class="dice" id="p1d2"></div>
       </div>
-
-      <div class="card pink">
-        <h2 id="p2Name">Player 2</h2>
-        <div class="diceRow">
-          <div class="dice" id="p2d1"></div>
-          <div class="dice" id="p2d2"></div>
-        </div>
-        <div id="p2total"></div>
-        <div id="p2wins"></div>
-      </div>
-
+      <div id="p1total"></div>
+      <div id="p1wins"></div>
     </div>
 
-    <div id="rolling" class="rolling hidden">🎲 ROLLING DICE 🎲</div>
-
-    <button id="rollBtn" disabled>ROLL</button>
-
-    <div class="history" id="history"></div>
-
-    <button id="resetBtn" class="hidden">RESET GAME</button>
+    <div class="card pink">
+      <h2 id="p2Name">Player 2</h2>
+      <div class="diceRow">
+        <div class="dice" id="p2d1"></div>
+        <div class="dice" id="p2d2"></div>
+      </div>
+      <div id="p2total"></div>
+      <div id="p2wins"></div>
+    </div>
 
   </div>
 
-  <script src="script.js"></script>
+  <div id="rolling" class="hidden">🎲 ROLLING DICE 🎲</div>
+
+  <button id="rollBtn" disabled>ROLL</button>
+
+  <div id="history"></div>
+
+  <button id="resetBtn" class="hidden">RESET</button>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
