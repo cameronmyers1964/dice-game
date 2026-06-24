@@ -1,171 +1,162 @@
 let p1Wins = 0;
 let p2Wins = 0;
-let rollCount = 0;
+let countedRounds = 0;
 
+let gameStarted = false;
 let gameOver = false;
 let tieBreaker = false;
 
-function rand() {
-  return Math.floor(Math.random() * 6) + 1;
+function rollDie() {
+    return Math.floor(Math.random() * 6) + 1;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  document.getElementById("startBtn").addEventListener("click", startGame);
-  document.getElementById("rollBtn").addEventListener("click", roll);
-  document.getElementById("resetBtn").addEventListener("click", resetGame);
+    document.getElementById("startBtn").addEventListener("click", startGame);
+    document.getElementById("rollBtn").addEventListener("click", rollDice);
+    document.getElementById("resetBtn").addEventListener("click", resetGame);
+
 });
 
 function startGame() {
 
-  const p1 = document.getElementById("p1").value || "Player 1";
-  const p2 = document.getElementById("p2").value || "Player 2";
+    p1Wins = 0;
+    p2Wins = 0;
+    countedRounds = 0;
+    tieBreaker = false;
+    gameOver = false;
+    gameStarted = true;
 
-  document.getElementById("p1Name").innerText = p1;
-  document.getElementById("p2Name").innerText = p2;
+    const p1 = document.getElementById("p1").value || "Player 1";
+    const p2 = document.getElementById("p2").value || "Player 2";
 
-  document.getElementById("rollBtn").disabled = false;
-  document.getElementById("status").innerText = "Game Started";
+    document.getElementById("p1Name").textContent = p1;
+    document.getElementById("p2Name").textContent = p2;
+
+    document.getElementById("scores").textContent =
+        `${p1}: 0 wins | ${p2}: 0 wins`;
+
+    document.getElementById("history").innerHTML = "";
+
+    document.getElementById("status").textContent =
+        "Game Started";
+
+    document.getElementById("rollBtn").disabled = false;
 }
 
-function roll() {
+function rollDice() {
 
-  if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
-  document.getElementById("rollBtn").disabled = true;
-
-  setTimeout(() => {
-
-    const a = rand();
-    const b = rand();
-    const c = rand();
-    const d = rand();
+    const a = rollDie();
+    const b = rollDie();
+    const c = rollDie();
+    const d = rollDie();
 
     const total1 = a + b;
     const total2 = c + d;
 
-    let resultText = "";
+    document.getElementById("p1d1").textContent = a;
+    document.getElementById("p1d2").textContent = b;
 
-    // TIE RULE
+    document.getElementById("p2d1").textContent = c;
+    document.getElementById("p2d2").textContent = d;
+
+    document.getElementById("p1Total").textContent =
+        `Total: ${total1}`;
+
+    document.getElementById("p2Total").textContent =
+        `Total: ${total2}`;
+
     if (total1 === total2) {
 
-      document.getElementById("status").innerText =
-        tieBreaker ? "🔥 TIEBREAKER - ROLL AGAIN" : "Tie - Roll Again";
+        document.getElementById("status").textContent =
+            tieBreaker ?
+            "🔥 TIE BREAKER - Tie - Roll Again" :
+            "Tie - Roll Again";
 
-      render(a,b,c,d,total1,total2,"Tie - Roll Again");
-
-      document.getElementById("rollBtn").disabled = false;
-      return;
+        return;
     }
 
-    rollCount++;
+    const p1 = document.getElementById("p1Name").textContent;
+    const p2 = document.getElementById("p2Name").textContent;
 
-    // 🔥 TIEBREAKER ACTIVATION (5–5)
-    if (p1Wins === 5 && p2Wins === 5 && !tieBreaker) {
-      tieBreaker = true;
-      document.getElementById("status").innerText = "🔥 TIEBREAKER ROUND";
+    if (tieBreaker) {
+
+        const winner = total1 > total2 ? p1 : p2;
+
+        document.getElementById("status").textContent =
+            `🏆 Winner: ${winner}`;
+
+        gameOver = true;
+        document.getElementById("rollBtn").disabled = true;
+        return;
     }
 
-    let winner = total1 > total2 ? "p1" : "p2";
+    countedRounds++;
 
-    // NORMAL MODE
-    if (!tieBreaker) {
-
-      if (winner === "p1") p1Wins++;
-      else p2Wins++;
-
-    } 
-    // 🔥 TIEBREAKER MODE (ONE ROLL DECIDES ALL)
-    else {
-
-      if (winner === "p1") {
-        endGame("p1");
-      } else {
-        endGame("p2");
-      }
-
-      return;
+    if (total1 > total2) {
+        p1Wins++;
+    } else {
+        p2Wins++;
     }
 
-    render(a,b,c,d,total1,total2,resultText);
+    document.getElementById("scores").textContent =
+        `${p1}: ${p1Wins} wins | ${p2}: ${p2Wins} wins`;
 
-    checkEnd();
+    document.getElementById("history").innerHTML =
+        `Round ${countedRounds}: ${p1} ${total1} - ${total2} ${p2}<br>` +
+        document.getElementById("history").innerHTML;
 
-    document.getElementById("rollBtn").disabled = false;
+    if (p1Wins === 5 && p2Wins === 5) {
 
-  }, 400);
-}
+        tieBreaker = true;
 
-function checkEnd() {
+        document.getElementById("status").textContent =
+            "🔥 TIE BREAKER ROUND";
 
-  if (rollCount >= 10) {
-    endGame();
-  }
+        return;
+    }
 
-  if (p1Wins >= 6 || p2Wins >= 6) {
-    endGame();
-  }
-}
+    if (countedRounds >= 10 || p1Wins >= 6 || p2Wins >= 6) {
 
-function render(a,b,c,d,total1,total2,resultText) {
+        const winner = p1Wins > p2Wins ? p1 : p2;
 
-  document.getElementById("p1d1").style.backgroundImage = `url(${a}.png)`;
-  document.getElementById("p1d2").style.backgroundImage = `url(${b}.png)`;
-  document.getElementById("p2d1").style.backgroundImage = `url(${c}.png)`;
-  document.getElementById("p2d2").style.backgroundImage = `url(${d}.png)`;
+        document.getElementById("status").textContent =
+            `🏆 Winner: ${winner}`;
 
-  const p1 = document.getElementById("p1Name").innerText;
-  const p2 = document.getElementById("p2Name").innerText;
-
-  document.getElementById("history").innerHTML =
-    `#${rollCount} ${p1}: ${total1} - ${p2}: ${total2} ${resultText}<br>` +
-    document.getElementById("history").innerHTML;
-
-  document.getElementById("scores").innerText =
-    `${p1} ${p1Wins} | ${p2} ${p2Wins}`;
-}
-
-function endGame(forcedWinner = null) {
-
-  gameOver = true;
-  tieBreaker = false;
-
-  document.getElementById("rollBtn").disabled = true;
-
-  const p1 = document.getElementById("p1Name").innerText;
-  const p2 = document.getElementById("p2Name").innerText;
-
-  let winner;
-
-  if (forcedWinner) {
-    winner = forcedWinner === "p1" ? p1 : p2;
-  } else {
-    winner =
-      p1Wins > p2Wins ? p1 :
-      p2Wins > p1Wins ? p2 :
-      "Tie Game";
-  }
-
-  document.getElementById("status").innerText = "🏆 Winner: " + winner;
+        gameOver = true;
+        document.getElementById("rollBtn").disabled = true;
+    }
 }
 
 function resetGame() {
 
-  p1Wins = 0;
-  p2Wins = 0;
-  rollCount = 0;
+    gameStarted = false;
+    gameOver = false;
+    tieBreaker = false;
 
-  gameOver = false;
-  tieBreaker = false;
+    p1Wins = 0;
+    p2Wins = 0;
+    countedRounds = 0;
 
-  document.getElementById("history").innerHTML = "";
-  document.getElementById("scores").innerText = "";
-  document.getElementById("status").innerText = "Game Reset";
+    document.getElementById("p1Name").textContent = "Player 1";
+    document.getElementById("p2Name").textContent = "Player 2";
 
-  document.getElementById("rollBtn").disabled = true;
+    document.getElementById("p1d1").textContent = "-";
+    document.getElementById("p1d2").textContent = "-";
 
-  document.getElementById("p1d1").style.backgroundImage = "";
-  document.getElementById("p1d2").style.backgroundImage = "";
-  document.getElementById("p2d1").style.backgroundImage = "";
-  document.getElementById("p2d2").style.backgroundImage = "";
+    document.getElementById("p2d1").textContent = "-";
+    document.getElementById("p2d2").textContent = "-";
+
+    document.getElementById("p1Total").textContent = "";
+    document.getElementById("p2Total").textContent = "";
+
+    document.getElementById("scores").textContent = "";
+    document.getElementById("history").innerHTML = "";
+
+    document.getElementById("status").textContent =
+        "Enter names and press Start Game";
+
+    document.getElementById("rollBtn").disabled = true;
 }
