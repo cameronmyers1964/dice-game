@@ -1,172 +1,71 @@
-let p1Wins = 0;
-let p2Wins = 0;
-let rollCount = 0;
-let gameOver = false;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Best of 10 Dice Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
-let viperPattern = [];
-let patternIndex = 0;
+<body>
 
-const patternSet = [
-  [10,3],[7,6],[6,2],[11,9],[12,3],[9,8],
-  [4,3],[12,10],[9,8],[6,3],[9,2],[8,3]
-];
+<div class="header">
+🎲 <b>BEST OF 10 DICE GAME</b> 🎲
+</div>
 
-function rand() {
-  return Math.floor(Math.random() * 6) + 1;
-}
+<div class="container">
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("startBtn").addEventListener("click", startGame);
-  document.getElementById("rollBtn").addEventListener("click", roll);
-  document.getElementById("resetBtn").addEventListener("click", () => location.reload());
-});
+  <!-- SETUP -->
+  <div class="setup">
+    <input id="p1" placeholder="Player 1 Name">
+    <input id="p2" placeholder="Player 2 Name">
+    <button id="startBtn">Start Game</button>
+  </div>
 
-function startGame() {
+  <!-- STATUS -->
+  <div id="status">Enter names to begin</div>
 
-  const p1 = document.getElementById("p1").value || "Player 1";
-  const p2 = document.getElementById("p2").value || "Player 2";
+  <!-- SCOREBOARD -->
+  <div id="scores" style="margin-top:10px;"></div>
 
-  document.getElementById("p1Name").innerText = p1;
-  document.getElementById("p2Name").innerText = p2;
+  <!-- GAME BOARD -->
+  <div class="players">
 
-  document.getElementById("rollBtn").disabled = false;
+    <!-- PLAYER 1 -->
+    <div class="card blue">
+      <h2 id="p1Name">Player 1</h2>
 
-  if (p1.toLowerCase().includes("viper") || p2.toLowerCase().includes("viper")) {
-    buildPattern();
-  }
-}
+      <div class="diceRow">
+        <div class="dice" id="p1d1"></div>
+        <div class="dice" id="p1d2"></div>
+      </div>
 
-function buildPattern() {
+      <div id="p1total"></div>
+    </div>
 
-  viperPattern = [];
-  patternIndex = 0;
+    <!-- PLAYER 2 -->
+    <div class="card pink">
+      <h2 id="p2Name">Player 2</h2>
 
-  // rotate pattern per game start
-  const offset = Math.floor(Math.random() * patternSet.length);
+      <div class="diceRow">
+        <div class="dice" id="p2d1"></div>
+        <div class="dice" id="p2d2"></div>
+      </div>
 
-  for (let i = 0; i < 10; i++) {
+      <div id="p2total"></div>
+    </div>
 
-    const pair = patternSet[(i + offset) % patternSet.length];
+  </div>
 
-    viperPattern.push({
-      p1: pair[0],
-      p2: pair[1]
-    });
-  }
-}
+  <!-- HISTORY -->
+  <div id="history" style="margin-top:20px;"></div>
 
-function resolveWinner(total1, total2) {
+  <!-- CONTROLS -->
+  <button id="rollBtn" disabled>ROLL</button>
+  <button id="resetBtn" class="hidden">RESET</button>
 
-  const p1 = document.getElementById("p1Name").innerText.toLowerCase();
-  const p2 = document.getElementById("p2Name").innerText.toLowerCase();
+</div>
 
-  const p1V = p1.includes("viper");
-  const p2V = p2.includes("viper");
-
-  let winner = total1 > total2 ? "p1" : "p2";
-
-  // ONLY APPLY PATTERN IF VIPER EXISTS
-  if ((p1V || p2V) && viperPattern.length) {
-
-    const rule = viperPattern[patternIndex % viperPattern.length];
-    patternIndex++;
-
-    // FORCE STRUCTURED OUTCOME
-    if (p1V && !p2V) {
-      winner = rule.p1 < rule.p2 ? "p1" : "p2";
-    }
-
-    if (p2V && !p1V) {
-      winner = rule.p2 < rule.p1 ? "p2" : "p1";
-    }
-  }
-
-  return winner;
-}
-
-function roll() {
-
-  if (gameOver) return;
-
-  document.getElementById("rollBtn").disabled = true;
-
-  setTimeout(() => {
-
-    const a = rand();
-    const b = rand();
-    const c = rand();
-    const d = rand();
-
-    const total1 = a + b;
-    const total2 = c + d;
-
-    let resultText = "";
-
-    if (total1 === total2) {
-      resultText = "Tie - Roll Again";
-      render(a,b,c,d,total1,total2,resultText);
-      document.getElementById("rollBtn").disabled = false;
-      return;
-    }
-
-    rollCount++;
-
-    const winner = resolveWinner(total1, total2);
-
-    if (winner === "p1") p1Wins++;
-    else p2Wins++;
-
-    render(a,b,c,d,total1,total2,resultText);
-
-    checkWin(); // IMPORTANT: immediate check
-
-    document.getElementById("rollBtn").disabled = false;
-
-  }, 400);
-}
-
-function checkWin() {
-
-  const maxWins = 6; // YOU SAID STOP AT 6 WIN LIMIT
-
-  if (p1Wins >= maxWins || p2Wins >= maxWins) {
-    endGame();
-  }
-
-  if (rollCount >= 10) {
-    endGame();
-  }
-}
-
-function render(a,b,c,d,total1,total2,resultText) {
-
-  document.getElementById("p1d1").style.backgroundImage = `url(${a}.png)`;
-  document.getElementById("p1d2").style.backgroundImage = `url(${b}.png)`;
-  document.getElementById("p2d1").style.backgroundImage = `url(${c}.png)`;
-  document.getElementById("p2d2").style.backgroundImage = `url(${d}.png)`;
-
-  const p1 = document.getElementById("p1Name").innerText;
-  const p2 = document.getElementById("p2Name").innerText;
-
-  document.getElementById("history").innerHTML =
-    `#${rollCount} ${p1}: ${total1} - ${p2}: ${total2} ${resultText}<br>` +
-    document.getElementById("history").innerHTML;
-
-  document.getElementById("scores").innerText =
-    `${p1} ${p1Wins} | ${p2} ${p2Wins}`;
-}
-
-function endGame() {
-
-  gameOver = true;
-
-  const winner =
-    p1Wins > p2Wins ? document.getElementById("p1Name").innerText :
-    p2Wins > p1Wins ? document.getElementById("p2Name").innerText :
-    "Tie Game";
-
-  document.getElementById("status").innerText = "Winner: " + winner;
-
-  document.getElementById("rollBtn").disabled = true;
-  document.getElementById("resetBtn").classList.remove("hidden");
-}
+<script src="script.js"></script>
+</body>
+</html>
